@@ -3,7 +3,7 @@
 # Script to to run pgbench load test against postgresql pod in kubernetes/Openshift
   
 
-opts=$(getopt -q -o n:t:e:v:m:i:r: --longoptions "namespace:,transactions:,template:,volsize:,memsize:,iterations:,mode:,resultdir:,clients:,scaling:,threads:,storageclass:" -n "getopt.sh" -- "$@");
+opts=$(getopt -q -o n:t:e:v:m:i:r: --longoptions "namespace:,transactions:,template:,volsize:,memsize:,iterations:,mode:,resultdir:,clients:,scaling:,threads:,storageclass:,accessmode:" -n "getopt.sh" -- "$@");
 
 if [ $? -ne 0 ]; then
     printf -- "$*\n"
@@ -22,6 +22,7 @@ if [ $? -ne 0 ]; then
     printf -- "\t\t --clients - number of pgbench clients\n"
     printf -- "\t\t --threads - number of pgbench threads\n"
     printf -- "\t\t --storageclass - name of storageclass to use to allocate storage\n"
+    printf -- "\t\t --accessmode -  Type of accessmode to use between ReadWriteOnce or ReadWriteMany\n"
     exit 1 
 fi
 
@@ -114,8 +115,15 @@ while true; do
                 scaling="$1"
                 shift;
             fi 
-        ;; 
-        --)
+        ;;
+        --accessmode)
+            shift;
+            if [ -n "$1" ]; then
+                accessmode="$1"
+                shift;
+            fi
+        ;;
+         --)
             break;
         ;;
         *)
@@ -127,7 +135,7 @@ done
 
 function create_pod {
         oc new-project $namespace 
-        oc new-app --template=$template -p VOLUME_CAPACITY=${volsize}Gi -p MEMORY_LIMIT=${memsize}Gi -p STORAGE_CLASS=${storageclass}
+        oc new-app --template=$template -p VOLUME_CAPACITY=${volsize}Gi -p MEMORY_LIMIT=${memsize}Gi -p STORAGE_CLASS=${storageclass} -p ACCESS_MODE=${accessmode}
         while [ "$(oc get pods | grep -v deploy | awk '{print $3}' | grep -v STATUS)" != "Running" ] ; do 
 	        sleep 5
         done 
