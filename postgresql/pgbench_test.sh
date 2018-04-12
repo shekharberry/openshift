@@ -187,7 +187,9 @@ function volume_setup {
     sleep 15
     oc exec -n $CNSPOJECT $CNSPOD -- gluster volume set $GLUSTERVOLUME performance.readdir-ahead off
     sleep 15
-   
+    oc exec -n $CNSPOJECT $CNSPOD -- gluster volume set $GLUSTERVOLUME performance.stat-prefetch off
+    sleep 15
+ 
     # add more options here - make it parameters 
 }
 
