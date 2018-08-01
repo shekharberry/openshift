@@ -1,0 +1,20 @@
+#!/usr/bin/env groovy
+
+def pgbench_test = PGBENCH_TEST.toString().toUpperCase() 
+def mongodb_ycsb_test = MONGODB_YCSB_TEST.toString().toUpperCase() 
+
+node {
+    // clear workspace
+    deleteDir()
+    // clone aos-cd-jobs repo where all the pipeline scripts exist
+    sh "git clone https://github.com/ekuric/openshift"
+
+    // run pgbench 
+    if ( pgbench_test == "TRUE" ) {
+	load "openshift/jenkinsfile/ptest.groovy"
+    }
+    // run mongo ycsb 
+    if ( mongodb_ycsb_test == "TRUE" ) {
+    	load "openshift/jenkinsfile/mongodbycsb.groovy"
+    }  
+}
